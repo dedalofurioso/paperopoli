@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spese Condivise - Inserisci Spesa</title>
+  <meta name="google-signin-client_id" content="606315583786-8ercnmp87n9q943hm0b2luehmung998j.apps.googleusercontent.com">
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    iframe {
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 100%;
+      height: 700px;
+      border: none;
+    }
+    a {
+      margin-top: 20px;
+      text-decoration: none;
+      color: #2980b9;
+      font-weight: bold;
+      border: 2px solid #2980b9;
+      padding: 10px 20px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    a:hover {
+      background-color: #2980b9;
+      color: white;
+    }
+    #accessDenied {
+      color: red;
+      font-weight: bold;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Inserisci una nuova spesa</h1>
+
+  <!-- Google Sign-In button -->
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+  <!-- Container per il form, nascosto finché non sei loggato e autorizzato -->
+  <div id="content" style="display:none;">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeFd1HtfOIQ9pmwFZtTSYfkNYZBWzp2mJuyLaWpj3tPuhHLQg/viewform?usp=header"></iframe>
+    <a href="spese.html">Vedi riepilogo spese</a>
+    <button onclick="signOut()" style="margin-top:20px;">Logout</button>
+  </div>
+
+  <div id="accessDenied" style="display:none;">
+    Accesso negato: non sei autorizzato a usare questo sito.
+  </div>
+
+  <script>
+    const authorizedEmails = [
+      "rossoshocking@gmail.com",
+      "rossopiublu@gmail.com"
+    ];
+
+    function onSignIn(googleUser) {
+      const profile = googleUser.getBasicProfile();
+      const email = profile.getEmail();
+      
+      if (authorizedEmails.includes(email)) {
+        // Nascondi il bottone di login, mostra il contenuto
+        document.querySelector('.g-signin2').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      } else {
+        // Utente non autorizzato
+        signOut();
+        document.querySelector('.g-signin2').style.display = 'none';
+        document.getElementById('content').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'block';
+      }
+    }
+
+    function signOut() {
+      const auth2 = gapi.auth2.getAuthInstance();
+      if(auth2) {
+        auth2.signOut().then(function () {
+          document.querySelector('.g-signin2').style.display = 'block';
+          document.getElementById('content').style.display = 'none';
+          document.getElementById('accessDenied').style.display = 'none';
+        });
+      }
+    }
+  </script>
+</body>
+</html>
