@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spese Condivise - Inserisci Spesa</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    iframe {
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 100%;
+      height: 700px;
+      border: none;
+    }
+    a {
+      margin-top: 20px;
+      text-decoration: none;
+      color: #2980b9;
+      font-weight: bold;
+      border: 2px solid #2980b9;
+      padding: 10px 20px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    a:hover {
+      background-color: #2980b9;
+      color: white;
+    }
+    #accessDenied {
+      color: red;
+      font-weight: bold;
+      margin-top: 40px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      background-color: #e74c3c;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Inserisci una nuova spesa</h1>
+
+  <!-- Bottone Google Sign-In sarà inserito qui -->
+  <div id="g_id_signin"></div>
+
+  <!-- Contenuto visibile solo se loggato e autorizzato -->
+  <div id="content" style="display:none;">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeFd1HtfOIQ9pmwFZtTSYfkNYZBWzp2mJuyLaWpj3tPuhHLQg/viewform?usp=header"></iframe>
+    <a href="spese.html">Vedi riepilogo spese</a>
+    <button id="signoutBtn">Logout</button>
+  </div>
+
+  <div id="accessDenied" style="display:none;">
+    Accesso negato: non sei autorizzato a usare questo sito.
+  </div>
+
+  <script>
+    const authorizedEmails = [
+      "rossoshocking@gmail.com",
+      "rossopiublu@gmail.com"
+    ];
+
+    function handleCredentialResponse(response) {
+      // Decodifica JWT per ottenere email
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      const email = payload.email;
+      console.log("Email ricevuta:", email);
+
+      if (authorizedEmails.includes(email)) {
+        document.getElementById('g_id_signin').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+        // Salviamo email in sessionStorage per tenere traccia dello stato login
+        sessionStorage.setItem('userEmail', email);
+      } else {
+        document.getElementById('g_id_signin').style.display = 'none';
+        document.getElementById('content').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'block';
+      }
+    }
+
+    window.onload = function () {
+      // Inizializza il client Google Identity
+      google.accounts.id.initialize({
+        client_id: '606315583786-8ercnmp87n9q943hm0b2luehmung998j.apps.googleusercontent.com',
+        callback: handleCredentialResponse
+      });
+
+      // Controlla se utente è già loggato
+      if(sessionStorage.getItem('userEmail') && authorizedEmails.includes(sessionStorage.getItem('userEmail'))) {
+        document.getElementById('g_id_signin').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      } else {
+        google.accounts.id.renderButton(
+          document.getElementById('g_id_signin'),
+          { theme: 'outline', size: 'large' }
+        );
+      }
+
+      // Logout
+      document.getElementById('signoutBtn').addEventListener('click', () => {
+        sessionStorage.removeItem('userEmail');
+        document.getElementById('content').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'none';
+        document.getElementById('g_id_signin').style.display = 'block';
+        google.accounts.id.cancel(); // cancella eventuale stato attivo
+      });
+    };
+  </script>
+</body>
+</html>
